@@ -1,0 +1,71 @@
+#!/bin/bash
+echo 'INCORRECT EXPRESSIONS FOR PROJECTION:'
+echo '*********'
+echo 'test1:'
+eval "./csvmap --sep=' ' --select='a ++ b as d' --filter='' input.csv output.csv"
+echo 'test2:'
+eval "./csvmap --sep=' ' --select='a + b + as d' input.csv output.csv"
+echo 'test3:'
+eval "./csvmap --sep=' ' --select='a, b, c, - a - b + c) as d' input.csv output.csv"
+echo 'test4:'
+eval "./csvmap --sep=' ' --select='a,b,c,d' --filter='' input.csv output.csv"
+echo 'test5:'
+eval "./csvmap --sep=' ' --select='a, b, c, a + +b as d' --filter='' input.csv output.csv"
+echo 'test6:'
+eval "./csvmap --sep=' ' --select='a, b, c, a + b + () as d' --filter='' input.csv output.csv"
+echo 'testщ7:'
+eval "./csvmap --sep=' ' --select='a, b, c, a (+) b' --filter='' input.csv output.csv"
+echo 'test8:'
+eval "./csvmap --sep=' ' --select='a, b, c, ()' --filter='' input.csv output.csv"
+echo 'test9:'
+eval "./csvmap --sep=' ' --select='(a)) as b' --filter='' input.csv output.csv"
+echo 'test10:'
+eval "./csvmap input.csv output.csv"
+echo 'finished'
+
+echo 'INCORRECT EXPRESSIONS FOR FILTER:'
+echo '*********'
+echo 'test1:'
+eval "./csvmap --sep=' ' --select='a' --filter='b >> c' input.csv output.csv"
+echo 'test2:'
+eval "./csvmap --sep=' ' --select='a' --filter='a and b not' input.csv output.csv"
+echo 'test3:'
+eval "./csvmap --sep=' ' --select='a' --filter='or a + b or c' input.csv output.csv"
+echo 'test4:'
+eval "./csvmap --sep=' ' --select='a' --filter='not d' input.csv output.csv"
+echo 'test5:'
+eval "./csvmap --sep=' ' --select='a' --filter='a or and b' input.csv output.csv"
+echo 'finished'
+
+
+echo 'INCORRECT EXPRESSIONS FOR AGGREGATION:'
+echo '*********'
+echo 'test1:'
+eval "./csvreduce --sep=' ' --keys='a' --aggrs='min(a, b) as d' input.csv output.csv"
+echo 'test2:'
+eval "./csvreduce --sep=' ' --keys='a' --aggrs='min(a+b) as d' input.csv output.csv"
+echo 'test3:'
+eval "./csvreduce --sep=' ' --keys='a' --aggrs='min(a) + a as d' input.csv output.csv"
+echo 'test4:'
+eval "./csvreduce --sep=' ' --keys='a' --aggrs='min(max(a)) as d' input.csv output.csv"
+echo 'test5:'
+eval "./csvreduce --sep=' ' --keys='a' --aggrs='min(1) + avg(b) as d' input.csv output.csv"
+echo 'finished'
+
+echo 'CORRECT SMALL TESTS'
+echo '*********'
+echo 'testMapSmall result->out_map_small.csv:'
+eval "./csvmap --sep=' ' --select='id, age, group, -score1 / 2 + (score2 * score3 - 1) ^ 2 as res' --filter='group = 201 or group = 205 and not age < 20' input.csv out_map_small.csv"
+
+echo 'testReduceSmall result->out_reduce_small.csv:'
+eval "./csvreduce --keys='id, group' --aggrs='avg(score1) as avg, min(score2) as min, max(score3) as max, -avg(score1) / 2 + (min(score2) * max(score3) - 1) ^ 2 as res' input.csv out_reduce_small.csv"
+echo 'finished'
+
+echo 'CORRECT BIG TESTS'
+echo '*********'
+echo 'testMapBIG result->out_map_big.csv:'
+eval "time ./csvmap --sep=' ' --select='a0, a1 + a1 as res' --filter='' input_big.csv out_map_big.csv"
+echo 'testReduceBig result->out_reduce_big.csv:'
+eval "time ./csvreduce --sep=' ' --keys='a0' --aggrs='min(a1)+max(a1)*max(a1)+avg(a1)^max(a1) + min(a1)+max(a1)*(max(a1)+avg(a1)^max(a1) + min(a1)+max(a1)*max(a1)+avg(a1))^max(a1) as res' --nprocess=5 input_big.csv out_reduce_big.csv"
+
+echo 'finished'
